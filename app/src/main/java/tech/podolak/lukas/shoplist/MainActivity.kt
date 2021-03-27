@@ -1,5 +1,7 @@
-package tech.podolak.lukas.shoplist
+ package tech.podolak.lukas.shoplist
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
@@ -46,6 +48,15 @@ class MainActivity : AppCompatActivity(), ShopListAdapter.OnItemClickListener {
         else if (clickedItem.imageResource == R.drawable.ic_baseline_check_box_24) {
             shopList.removeAt(position)
             adapter.notifyItemRemoved(position)
+        }
+    }
+
+    private fun saveData() {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
+        val editor: SharedPreferences.Editor = sharedPreferences.edit()
+
+        editor.apply() {
+            putString("key",  ObjectSerializer.serialize(shopList))
         }
     }
 
