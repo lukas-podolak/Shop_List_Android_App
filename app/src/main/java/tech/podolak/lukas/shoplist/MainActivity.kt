@@ -22,6 +22,9 @@ class MainActivity : AppCompatActivity(), ShopListAdapter.OnItemClickListener {
         recycler_view.adapter = adapter
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.setHasFixedSize(true)
+
+        loadData()
+        adapter.notifyDataSetChanged()
     }
 
     fun insertItem(view: View) {
@@ -33,21 +36,24 @@ class MainActivity : AppCompatActivity(), ShopListAdapter.OnItemClickListener {
 
             shopList.add(index, newItem)
             adapter.notifyItemInserted(index)
+            saveData()
         } else {
             Toast.makeText(this, "No text entered.", Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onItemClick(position: Int) {
-        val clickedItem:shoplist_item = shopList[position]
+        val clickedItem: shoplist_item = shopList[position]
 
         if (clickedItem.imageResource != R.drawable.ic_baseline_check_box_24) {
             clickedItem.imageResource = R.drawable.ic_baseline_check_box_24
             adapter.notifyItemChanged(position)
+            changeSavedData(position)
         }
         else if (clickedItem.imageResource == R.drawable.ic_baseline_check_box_24) {
             shopList.removeAt(position)
             adapter.notifyItemRemoved(position)
+            removeSavedData(position)
         }
     }
 
@@ -66,8 +72,29 @@ class MainActivity : AppCompatActivity(), ShopListAdapter.OnItemClickListener {
                 putInt("shopList_status_ir_$i", shopList[i].imageResource)
             }
         }
+    }
 
-        editor.commit()
+    private fun changeSavedData(position: Int) {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("ShopListSharedPref", Context.MODE_PRIVATE)
+        val editor: SharedPreferences.Editor = sharedPreferences.edit()
+
+        editor.apply() {
+            remove("shopList_status_test_$position")
+            remove("shopList_status_ir_$position")
+
+            putString("shopList_status_test_$position", shopList[position].test)
+            putInt("shopList_status_ir_$position", shopList[position].imageResource)
+        }
+    }
+
+    private fun removeSavedData(position: Int) {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("ShopListSharedPref", Context.MODE_PRIVATE)
+        val editor: SharedPreferences.Editor = sharedPreferences.edit()
+
+        editor.apply() {
+            remove("shopList_status_test_$position")
+            remove("shopList_status_ir_$position")
+        }
     }
 
     private fun loadData() {
