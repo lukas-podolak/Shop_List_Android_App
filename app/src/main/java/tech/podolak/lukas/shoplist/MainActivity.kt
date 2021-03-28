@@ -52,11 +52,31 @@ class MainActivity : AppCompatActivity(), ShopListAdapter.OnItemClickListener {
     }
 
     private fun saveData() {
-        val sharedPreferences: SharedPreferences = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
+        val sharedPreferences: SharedPreferences = getSharedPreferences("ShopListSharedPref", Context.MODE_PRIVATE)
         val editor: SharedPreferences.Editor = sharedPreferences.edit()
 
         editor.apply() {
-            putString("key",  ObjectSerializer.serialize(shopList))
+            putInt("shopList_size", shopList.size)
+
+            for (i in 0 .. shopList.size) {
+                remove("shopList_status_test_$i")
+                remove("shopList_status_ir_$i")
+
+                putString("shopList_status_test_$i", shopList[i].test)
+                putInt("shopList_status_ir_$i", shopList[i].imageResource)
+            }
+        }
+
+        editor.commit()
+    }
+
+    private fun loadData() {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("ShopListSharedPref", Context.MODE_PRIVATE)
+        val savedShopListSize: Int = sharedPreferences.getInt("shopList_size", 0)
+
+        for (i in 0 .. savedShopListSize) {
+            shopList[i].test = sharedPreferences.getString("shopList_status_test_$i", null).toString()
+            shopList[i].imageResource = sharedPreferences.getInt("shopList_status_ir_$i", 0)
         }
     }
 
