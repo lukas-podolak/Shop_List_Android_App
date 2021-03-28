@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
@@ -24,11 +25,10 @@ class MainActivity : AppCompatActivity(), ShopListAdapter.OnItemClickListener {
         recycler_view.setHasFixedSize(true)
 
         loadData()
-        adapter.notifyDataSetChanged()
     }
 
     fun insertItem(view: View) {
-        val index:Int = 0
+        val index:Int = shopList.size
 
         if (item_text_box.text.toString() != "") {
             val newItem = shoplist_item(R.drawable.ic_baseline_check_box_outline_blank_24, item_text_box.text.toString())
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity(), ShopListAdapter.OnItemClickListener {
 
             shopList.add(index, newItem)
             adapter.notifyItemInserted(index)
-            saveData()
+            saveData(index)
         } else {
             Toast.makeText(this, "No text entered.", Toast.LENGTH_SHORT).show()
         }
@@ -57,59 +57,72 @@ class MainActivity : AppCompatActivity(), ShopListAdapter.OnItemClickListener {
         }
     }
 
-    private fun saveData() {
+    private fun saveData(position: Int) {
         val sharedPreferences: SharedPreferences = getSharedPreferences("ShopListSharedPref", Context.MODE_PRIVATE)
         val editor: SharedPreferences.Editor = sharedPreferences.edit()
 
-        editor.apply() {
+        editor.apply {
+            remove("shopList_size")
             putInt("shopList_size", shopList.size)
 
-            for (i in 0 .. shopList.size) {
-                remove("shopList_status_test_$i")
-                remove("shopList_status_ir_$i")
+            remove("shopList_status_test_$position")
+            remove("shopList_status_ir_$position")
 
-                putString("shopList_status_test_$i", shopList[i].test)
-                putInt("shopList_status_ir_$i", shopList[i].imageResource)
-            }
-        }
+            val item: shoplist_item = shopList[position]
+            putString("shopList_status_test_$position", item.test)
+            putInt("shopList_status_ir_$position", item.imageResource)
+        }.apply()
+
+        Toast.makeText(this, "Data saved", Toast.LENGTH_SHORT).show()
     }
 
     private fun changeSavedData(position: Int) {
         val sharedPreferences: SharedPreferences = getSharedPreferences("ShopListSharedPref", Context.MODE_PRIVATE)
         val editor: SharedPreferences.Editor = sharedPreferences.edit()
 
-        editor.apply() {
+        editor.apply {
             remove("shopList_status_test_$position")
             remove("shopList_status_ir_$position")
 
-            putString("shopList_status_test_$position", shopList[position].test)
-            putInt("shopList_status_ir_$position", shopList[position].imageResource)
-        }
+            val item: shoplist_item = shopList[position]
+            putString("shopList_status_test_$position", item.test)
+            putInt("shopList_status_ir_$position", item.imageResource)
+        }.apply()
+
+        Toast.makeText(this, "Data changed", Toast.LENGTH_SHORT).show()
     }
 
     private fun removeSavedData(position: Int) {
         val sharedPreferences: SharedPreferences = getSharedPreferences("ShopListSharedPref", Context.MODE_PRIVATE)
         val editor: SharedPreferences.Editor = sharedPreferences.edit()
 
-        editor.apply() {
+        editor.apply {
+            remove("shopList_size")
+            putInt("shopList_size", shopList.size)
+
             remove("shopList_status_test_$position")
             remove("shopList_status_ir_$position")
-        }
+        }.apply()
+
+        Toast.makeText(this, "Data removed", Toast.LENGTH_SHORT).show()
     }
 
     private fun loadData() {
         val sharedPreferences: SharedPreferences = getSharedPreferences("ShopListSharedPref", Context.MODE_PRIVATE)
         val savedShopListSize: Int = sharedPreferences.getInt("shopList_size", 0)
 
-        for (i in 0 .. savedShopListSize) {
-            shopList[i].test = sharedPreferences.getString("shopList_status_test_$i", null).toString()
-            shopList[i].imageResource = sharedPreferences.getInt("shopList_status_ir_$i", 0)
+        if (savedShopListSize != 0) {
+            for (i in 0 until savedShopListSize) {
+                val index: Int = i
+                shopList.add(index, shoplist_item(sharedPreferences.getInt("shopList_status_ir_$index", 0), sharedPreferences.getString("shopList_status_test_$index", null).toString()))
+                adapter.notifyItemInserted(index)
+            }
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu_main, menu)
         return true
     }
 

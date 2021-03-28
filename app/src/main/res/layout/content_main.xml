@@ -43,15 +43,5 @@
             android:textColor="@android:color/white"
             android:drawableLeft="@drawable/ic_baseline_add_24"
             android:text="Add"/>
-
-        <!-- <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_margin="2dp"
-            android:onClick="removeItem"
-            android:background="?attr/colorPrimary"
-            android:textColor="@android:color/white"
-            android:text="Remove Item"/> -->
     </LinearLayout>
 </RelativeLayout>
